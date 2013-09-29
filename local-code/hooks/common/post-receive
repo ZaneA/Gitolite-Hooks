@@ -11,6 +11,14 @@ if [ -z "$GIT_DIR" ]; then
   exit 1
 fi
 
+# Hook the master branch by default, but allow alternative branches
+# In gitolite 3.5.2 or higher add "option ENV.BRANCH = branchName" to the repo config block
+if [ -z "$GL_OPTION_BRANCH" ]; then
+  BRANCH_TO_HOOK="refs/heads/master"
+else
+  BRANCH_TO_HOOK="refs/heads/$GL_OPTION_BRANCH"
+fi
+
 # Use these to remove "remote:" output from git.
 BLANK=$(echo -e "\e[1G        ")
 ARROW=$(echo -e "\e[1G------> ")
@@ -53,8 +61,8 @@ run_hook () {
 echo '' > $LOG_FILE
 
 while read oldrev newrev refname; do
-  # Only hook on master.
-  if [ "$refname" =  "refs/heads/master" ]; then
+  # Only hook only the specified branch.
+  if [ "$refname" =  "$BRANCH_TO_HOOK" ]; then
     # Empty line.
     echo -e "$BLANK"
 
